@@ -1,29 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'Michael Liao'
+import orm
+import asyncio
+from models import User
+async def test(loop):                      
+    await orm.create_pool(loop=loop, user='root', password='123456', db='awesome')
+    u = User(name='Test1', email='test2@qq.com', passwd='1234567890', image='about:blank')
+    await u.save()
+    orm.__pool.close()
+    await orm.__pool.wait_closed()
 
-'''
-async web application.
-'''
-
-import logging; logging.basicConfig(level=logging.INFO)
-
-import asyncio, os, json, time
-from datetime import datetime
-
-from aiohttp import web
-
-def index(request):
-    return web.Response(body=b'<h1>Awesome</h1>')
-
-async def init(loop):
-    app = web.Application(loop=loop)
-    app.router.add_route('GET', '/', index)
-    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
-    logging.info('server started at http://127.0.0.1:9000...')
-    return srv
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(init(loop))
-loop.run_forever()
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test(loop))
+    loop.close()
